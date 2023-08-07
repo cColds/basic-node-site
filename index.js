@@ -4,56 +4,22 @@ const fs = require("fs");
 const host = "localhost";
 const port = 8080;
 
+const pages = ["/", "/about", "/contact-me"];
+
 const server = http.createServer(function (req, res) {
-  switch (req.url) {
-    case "/": {
-      res.writeHead(200, { "Content-Type": "text/html" });
+  const isValidPage = pages.includes(req.url);
+  const status = isValidPage ? 200 : 404;
+  let page = isValidPage ? req.url : "/404";
+  if (req.url === "/") page = "/index";
 
-      fs.readFile("./index.html", "utf8", (err, data) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        res.end(data);
-      });
-      break;
+  res.writeHead(status, { "Content-Type": "text/html" });
+  fs.readFile(`.${page}.html`, "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      return;
     }
-    case "/about": {
-      res.writeHead(200, { "Content-Type": "text/html" });
-
-      fs.readFile("./about.html", "utf8", (err, data) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        res.end(data);
-      });
-      break;
-    }
-
-    case "/contact": {
-      res.writeHead(200, { "Content-Type": "text/html" });
-      fs.readFile("./contact.html", "utf8", (err, data) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        res.end(data);
-      });
-      break;
-    }
-
-    default: {
-      res.writeHead(404, { "Content-Type": "text/html" });
-      fs.readFile("./404.html", "utf8", (err, data) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        res.end(data);
-      });
-    }
-  }
+    res.end(data);
+  });
 });
 
 server.listen(port, () => {
